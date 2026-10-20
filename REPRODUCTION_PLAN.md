@@ -2,7 +2,7 @@
 
 **Paper:** A. Theophilou & Ö. Şimşek, *Novel Exploration via Orthogonality*, NeurIPS 2025 ([OpenReview](https://openreview.net/forum?id=yJS1eZSNUv)).
 The PDF was removed from the repo at HEAD. You can recover it with `git show dc4de29:Novel_Exploration_via_Orthogonality.pdf > NEO_paper.pdf`.
-**Group:** Céline Wallart, Nathan Brack, Yilin Lin · **Supervisor:** Lucia Pezzetti
+**Group:** Céline Wallart, Nathan Brack, Yilin Lin, Adrian · **Supervisor:** Lucia Pezzetti
 **Course:** UZH Reinforcement Learning, Reproducibility Project, Fall 2026 · **Poster session:** 15 Dec 2026
 **Status:** draft, 20 Oct 2026
 
@@ -168,8 +168,11 @@ Suggested split: one person leads, and a second person independently checks the 
 |---|---|---|
 | Theory lead | WP1 proof reconstruction + write-up | TBD |
 | Theory checker / simulations | WP1 checker, counter-examples; links to WP2 logs | TBD |
-| Experiments lead | WP0 pipeline, WP2/WP3 runs, S1 | TBD |
+| Experiments lead | WP0 pipeline, WP2 runs (NEO, SP-novelty, Q-learning-novelty) | TBD |
+| Ablation & stretch | WP3 (NEO first-ev, optional Z sweep), S1 eigen-options failure, S2 second city | TBD |
 | Shared | Deviations log, statistics, report, poster | all |
+
+With four people, the core work (WP1–WP3) is covered without relying on the stretch goals. The ablation & stretch role runs WP3 first and moves to S1/S2 only once the WP2 pipeline is stable.
 
 Everyone reviews everyone else's part before the 10 Nov meeting and again before the report is submitted.
 
