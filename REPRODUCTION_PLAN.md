@@ -168,7 +168,7 @@ Suggested split: one person leads, and a second person independently checks the 
 |---|---|---|
 | Theory lead | WP1 proof reconstruction + write-up | TBD |
 | Theory checker / simulations | WP1 checker, counter-examples; links to WP2 logs | TBD |
-| Experiments lead | WP0 pipeline, WP2 runs (NEO, SP-novelty, Q-learning-novelty) | TBD |
+| Experiments lead (C2) | WP0 pipeline, WP2 runs (NEO, SP-novelty, Q-learning-novelty) | Yilin |
 | Ablation & stretch | WP3 (NEO first-ev, optional Z sweep), S1 eigen-options failure, S2 second city | TBD |
 | Shared | Deviations log, statistics, report, poster | all |
 
