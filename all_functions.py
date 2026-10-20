@@ -591,7 +591,7 @@ class AgentQ2:
             _v = v[:, o].T
 
         if method  == 'cover_options':
-			cover_new_G = copy.deepcopy(new_G)
+            cover_new_G = copy.deepcopy(new_G)
             options = []
             N = num_options
             fiedler_vecs = []
