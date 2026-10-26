@@ -1,5 +1,7 @@
 # %%
 import copy
+import sys
+import time
 import numpy as np
 import pickle
 import copy
@@ -24,10 +26,10 @@ CITIES = {
     "New York":  {"center": (40.7128, -74.0060), "initial_radius": 7000},
     "Zurich":    {"center": (47.3769,   8.5417), "initial_radius": 9000},
     "Beijing":   {"center": (39.9042, 116.4074), "initial_radius": 8000},
-    "Cape Town": {"center": (-33.9249, 18.4241), "initial_radius": 7000},
+    "Cape Town": {"center": (-33.9249, 18.4241), "initial_radius": 9000},
     "New Delhi": {"center": (28.6139,  77.2090), "initial_radius": 5000},
     "London":    {"center": (51.5074,  -0.1278), "initial_radius": 4000},
-    "Paris":     {"center": (48.8566,   2.3522), "initial_radius": 7000},
+    "Paris":     {"center": (48.8566,   2.3522), "initial_radius": 5000},
 }
 
 cities = CITIES.keys()
@@ -52,11 +54,20 @@ def get_street_graph(
     network_type='drive',
     simplify=True
 ):
-    # 1) Fetch directed graph
-    G = ox.graph_from_point(center_point,
-                            dist=initial_radius,
-                            network_type=network_type,
-                            simplify=simplify)
+    # 1) Fetch directed graph (the public Overpass server is often overloaded -> retry with backoff)
+    for attempt in range(8):
+        try:
+            G = ox.graph_from_point(center_point,
+                                    dist=initial_radius,
+                                    network_type=network_type,
+                                    simplify=simplify)
+            break
+        except Exception as e:
+            if attempt == 7:
+                raise
+            wait = 60 * 2**attempt
+            print(f"OSM download failed ({type(e).__name__}), retrying in {wait} s", flush=True)
+            time.sleep(wait)
     # 2) Keep only the largest weakly connected component
     G = G.subgraph(max(nx.weakly_connected_components(G), key=len)).copy()
     # 3) If it’s too big, sample ~desired_nodes by BFS
@@ -254,7 +265,12 @@ def run_training_on_env(G, env_name, option_name, num_options=4, instances=1, ma
         print('len: ', len(new_G.nodes()))
     return instance_list, eval_instance_list, node_instance_list, edge_instance_list, running_agent, visitation_mat, info_instance_list
 
-def main():
+def get_save_name(option_name, city, RW_LAP=True, nsa_greedy=False, det_option_policy=True, num_options=4, option_eps=0.1, instances=1):
+    # result file of one (city, method) run; multi-seed runs get a _seeds<N> suffix so they don't overwrite the single-seed ones
+    seeds = '' if instances == 1 else '_seeds' + str(instances)
+    return 'NEO_n_' + option_name + '_street_' + city.replace(' ', '_') + '_' + str(RW_LAP) + '_' + str(nsa_greedy) + '_' + str(det_option_policy) + '__' + str(num_options) + '_' + str(option_eps) + seeds + '.pkl'
+
+def main(instances=1):
     env_names = ['street']
     #option_name = 'Qlearning'
     #option_name = 'hotspot_options' (we refer to our NEO options as hotspot_options in code)
@@ -282,14 +298,22 @@ def main():
                             print(f"Running training on environment: {env_name}")
                             print('option_eps: ', option_eps)
                             # Train & get results for each environment
-                            instance_list, eval_instance_list, node_instance_list, edge_instance_list, last_agent, visitation_mat, info_instance_list = run_training_on_env(city_G, env_name, option_name=option_name, num_options=num_options, directed=False, option_eps=option_eps, nsa_greedy=nsa_greedy, det_option_policy=det_option_policy, reward_eval=reward_eval, RW_LAP=RW_LAP)
+                            instance_list, eval_instance_list, node_instance_list, edge_instance_list, last_agent, visitation_mat, info_instance_list = run_training_on_env(city_G, env_name, option_name=option_name, num_options=num_options, directed=False, option_eps=option_eps, nsa_greedy=nsa_greedy, det_option_policy=det_option_policy, reward_eval=reward_eval, RW_LAP=RW_LAP, instances=instances)
                             results['env_results'][(city, option_name)] = {'city': city, 'node_instance_list:': node_instance_list, 'edge_instance_list': edge_instance_list, 'stochastic': stochastic, 'option_name': option_name,'num_options': num_options, 'training_returns': instance_list,'eval_returns': eval_instance_list,'final_agent': last_agent,'visitation_mat': visitation_mat,'info_instance_list': info_instance_list}
                             for k in range(len(eval_instance_list)):
                                 print('eval_instance_list: ', np.shape(instance_list[k]))
-                            save_name = 'NEO_n_' + option_name + '_street_' + city.replace(' ', '_') + '_' + str(RW_LAP) + '_' + str(nsa_greedy) + '_' + str(det_option_policy) + '__' + str(num_options) + '_' + str(option_eps) + '.pkl'
+                            save_name = get_save_name(option_name, city, RW_LAP, nsa_greedy, det_option_policy, num_options, option_eps, instances)
                             with open(save_name, "wb") as f:
                                 pickle.dump({'env_results': {(city, option_name): results['env_results'][(city, option_name)]}}, f)
         
 if __name__ == "__main__":
-    main()
+    # python Many_Streets_Eval.py                              -> all cities, 1 seed
+    # python Many_Streets_Eval.py "Cape Town" Zurich --instances 5  -> only these cities, 5 seeds each
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cities', nargs='*', default=list(CITIES))
+    parser.add_argument('--instances', type=int, default=1, help='number of seeds (each with its own start/goal)')
+    args = parser.parse_args()
+    cities = args.cities
+    main(instances=args.instances)
 

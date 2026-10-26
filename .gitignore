@@ -1,0 +1,8 @@
+*.err
+*.out
+*pycache*
+*.pkl
+*.json
+logs/
+*.pdf
+*.sh

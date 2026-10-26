@@ -8,17 +8,13 @@ INTERACTIVE = 'ipykernel' in sys.modules
 if not INTERACTIVE:
     matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+_show = plt.show
 import numpy as np
+import chart_utils
 from chart_utils import make_plots
-from Many_Streets_Eval import CITIES
-
-# must match the settings used in Many_Streets_Eval.main()
-RW_LAP = True
-nsa_greedy = False
-det_option_policy = True
-num_options = 4
-option_eps = 0.1
-OUT_DIR = 'plots_many_streets'
+# chart_utils turns on LaTeX text rendering; the tier3 LaTeX install lacks type1cm.sty, so use matplotlib's own renderer
+matplotlib.rcParams['text.usetex'] = False
+from Many_Streets_Eval import CITIES, get_save_name
 
 # option name in code -> label in the plot
 option_labels = {
@@ -27,17 +23,23 @@ option_labels = {
     'Qlearning-novelty': 'Qlearning-novelty',
 }
 
-def get_save_name(option_name, city):
-    # same naming scheme as in Many_Streets_Eval.main()
-    return 'NEO_n_' + option_name + '_street_' + city.replace(' ', '_') + '_' + str(RW_LAP) + '_' + str(nsa_greedy) + '_' + str(det_option_policy) + '__' + str(num_options) + '_' + str(option_eps) + '.pkl'
+# python plots_many_streets.py                         -> all cities, single-seed results
+# python plots_many_streets.py "New Delhi" --instances 5  -> only New Delhi, 5-seed results (mean + confidence band)
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('cities', nargs='*', default=list(CITIES))
+parser.add_argument('--instances', type=int, default=1)
+args = parser.parse_args([] if INTERACTIVE else None)
+cities_to_plot, instances = args.cities, args.instances
 
+OUT_DIR = os.path.join('plots_many_streets', 'per_city' if instances == 1 else f'per_city_seeds{instances}')
 os.makedirs(OUT_DIR, exist_ok=True)
-for city in CITIES:
+for city in cities_to_plot:
     print(f"City: {city}")
     option_names = []
     alg = []
     for option_name, label in option_labels.items():
-        save_name = get_save_name(option_name, city)
+        save_name = get_save_name(option_name, city, instances=instances)
         if not os.path.exists(save_name):
             print(f"  missing {save_name}, skipping")
             continue
@@ -53,9 +55,19 @@ for city in CITIES:
     if len(alg) == 0:
         continue
     plt.rcParams['figure.figsize'] = [6, 6]
-    make_plots(alg, option_names, plot_title=city + ' (Directed)', cumulative=False, episodic=False, track_disc_reward=False, open_plot=False)
-    if not INTERACTIVE:
-        plt.savefig(os.path.join(OUT_DIR, city.replace(' ', '_') + '.pdf'), bbox_inches='tight')
-        plt.close('all')
+    out_file = os.path.join(OUT_DIR, city.replace(' ', '_') + '.pdf')
+
+    def finish_and_show(out_file=out_file):
+        # chart_utils.plot() calls show() and then closes the figure, so fix the layout and save at show() time
+        ax = plt.gca()
+        ax.set_xlabel('Evaluation (every 2000 training steps)')
+        # chart_utils puts the legend lower left, on top of the curves -> move it below the plot
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol=3, frameon=False, fontsize=11)
+        if INTERACTIVE:
+            _show()
+        else:
+            plt.savefig(out_file, bbox_inches='tight')
+    chart_utils.pyplot.show = finish_and_show
+    make_plots(alg, option_names, plot_title=city + ' (Directed)', cumulative=False, episodic=False, track_disc_reward=False, open_plot=False, plot_y='States discovered')
 
 # %%
