@@ -5,5 +5,5 @@
 *.json
 logs/
 *.pdf
-*.sh.venv/
+.venv/
 results/
