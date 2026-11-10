@@ -1,5 +1,6 @@
 # %%
 import copy
+import os
 import sys
 import time
 import numpy as np
@@ -267,8 +268,9 @@ def run_training_on_env(G, env_name, option_name, num_options=4, instances=1, ma
 
 def get_save_name(option_name, city, RW_LAP=True, nsa_greedy=False, det_option_policy=True, num_options=4, option_eps=0.1, instances=1):
     # result file of one (city, method) run; multi-seed runs get a _seeds<N> suffix so they don't overwrite the single-seed ones
+    # results go to $NEO_RESULTS_DIR if set (e.g. on /work, the files are ~30 MB each), else to the current folder
     seeds = '' if instances == 1 else '_seeds' + str(instances)
-    return 'NEO_n_' + option_name + '_street_' + city.replace(' ', '_') + '_' + str(RW_LAP) + '_' + str(nsa_greedy) + '_' + str(det_option_policy) + '__' + str(num_options) + '_' + str(option_eps) + seeds + '.pkl'
+    return os.path.join(os.environ.get('NEO_RESULTS_DIR', '.'), 'NEO_n_' + option_name + '_street_' + city.replace(' ', '_') + '_' + str(RW_LAP) + '_' + str(nsa_greedy) + '_' + str(det_option_policy) + '__' + str(num_options) + '_' + str(option_eps) + seeds + '.pkl')
 
 def main(instances=1):
     env_names = ['street']

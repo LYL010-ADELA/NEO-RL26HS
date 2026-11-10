@@ -246,9 +246,11 @@ def plot_final_coverage(results, subdir='coverage', suffix=''):
             y = j + (i - 1) * (bar_h + 0.03)
             ax.barh(y, m[0], height=bar_h, color=color, label=label if j == 0 else None)
             if n_seeds > 1:
-                ax.errorbar(m[0], y, xerr=ci[0], color=TEXT_2, lw=1, capsize=2, zorder=4)
+                # a percentage can't leave [0, 100], so clip the CI there
+                lo, hi = max(0, m[0] - ci[0]), min(100, m[0] + ci[0])
+                ax.errorbar(m[0], y, xerr=[[m[0] - lo], [hi - m[0]]], color=TEXT_2, lw=1, capsize=2, zorder=4)
                 ax.scatter(final, np.full(n_seeds, y), s=10, color=SURFACE, edgecolor=TEXT, linewidth=0.7, zorder=5)
-                x_label = min(105, max(final.max(), m[0] + ci[0]))
+                x_label = max(final.max(), hi)
             else:
                 x_label = m[0]
             ax.annotate(f'{m[0]:.0f}%', (x_label, y), xytext=(4, 0), textcoords='offset points', va='center', fontsize=8, color=TEXT_2)
