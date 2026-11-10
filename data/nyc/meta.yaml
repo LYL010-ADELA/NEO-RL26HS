@@ -1,0 +1,10 @@
+downloaded: 2026-11-10T11:57:21
+osmnx: 2.1.1
+networkx: 3.7
+center_point: [40.7128, -74.006]
+initial_radius_m: 7000
+desired_nodes: 10000
+network_type: drive
+simplify: true
+nodes: 10000
+edges: 22322

@@ -131,7 +131,8 @@ def get_start_and_goal_state(run, gw, G):
 
     return source, target
 
-def run_training_on_env(G, env_name, option_name, num_options=4, instances=1, max_steps_mul=250, ep_time_horizon=1000, eval_interval=2000, directed=False, option_eps=0.1, nsa_greedy=False, det_option_policy=True, reward_eval=True, RW_LAP=True):
+def run_training_on_env(G, env_name, option_name, num_options=4, instances=1, max_steps_mul=250, ep_time_horizon=1000, eval_interval=2000, directed=False, option_eps=0.1, nsa_greedy=False, det_option_policy=True, reward_eval=True, RW_LAP=True, seeds=None):
+    # seeds: explicit run indices (e.g. [7]) so single seeds can run in parallel processes; default range(instances)
     max_steps_mul = 250
     stochastic = False
     grid_world = True
@@ -172,7 +173,7 @@ def run_training_on_env(G, env_name, option_name, num_options=4, instances=1, ma
     node_instance_list = []
     edge_instance_list = []
     info_instance_list = []
-    for run in range(instances):
+    for run in (range(instances) if seeds is None else seeds):
         print('len(G.nodes()): ', len(G.nodes()))
         visitation_mat = np.zeros(len(G.nodes()))
         visitation_mat_2 = np.zeros(len(G.nodes()))

@@ -66,11 +66,11 @@ Each item below is either something to verify (V) or a deviation we must documen
 
 ### WP0: Setup (all; week of 20 Oct)
 - [x] Set up the fork: `origin` = [LYL010-ADELA/NEO-RL26HS](https://github.com/LYL010-ADELA/NEO-RL26HS), `upstream` = AndreasTheo/NEO. The untouched upstream commit `bfa5aa1` is tagged `upstream-original` (local tag; push it with `git push origin upstream-original`).
-- [ ] Minimal fix to make the code import (TabError). Every code change goes into a **deviations log** (`DEVIATIONS.md`) that records what changed, why, and its possible effect.
-- [ ] Pin the environment (`requirements.txt` or `environment.yml` with Python, numpy, scipy, networkx, osmnx, scikit-learn versions).
-- [ ] Convert `NYC_Street_Evals.ipynb` into a script with CLI arguments (`--method --seed --num-options --graph`). The script saves per-run results (eval returns, node/edge counts, eigenvalues, option info) to `results/`. This lets us run seeds in parallel and restart failed ones.
-- [ ] Snapshot the NYC graph (`data/nyc_graph.graphml`) and record the download date and osmnx version. Report: #nodes, #edges, number of strongly connected components and size of the largest, out-degree-0 nodes, and the fraction of (start, goal) pairs where the goal is reachable.
-- [ ] **Pilot:** 1 seed × each method, with wall-clock time and peak memory measured. Then extrapolate: total ≈ 4 methods × 20 seeds × T_run. Use this to decide whether we need RenkuLab compute. If we do, one email to kone@ifi.uzh.ch.
+- [x] Minimal fix to make the code import (TabError). Every code change goes into a **deviations log** (`DEVIATIONS.md`) that records what changed, why, and its possible effect.
+- [x] Pin the environment (`requirements.txt` or `environment.yml` with Python, numpy, scipy, networkx, osmnx, scikit-learn versions).
+- [x] Convert `NYC_Street_Evals.ipynb` into a script with CLI arguments (`--method --seed --num-options --graph`). The script saves per-run results (eval returns, node/edge counts, eigenvalues, option info) to `results/`. This lets us run seeds in parallel and restart failed ones.
+- [x] Snapshot the NYC graph (done as CSV in `data/nyc/`, see `nyc_graph.py`) and record the download date and osmnx version. Report: #nodes, #edges, number of strongly connected components and size of the largest, out-degree-0 nodes, and the fraction of (start, goal) pairs where the goal is reachable.
+- [x] **Pilot:** 1 seed × each method, with wall-clock time and peak memory measured. Then extrapolate: total ≈ 4 methods × 20 seeds × T_run. Use this to decide whether we need RenkuLab compute. If we do, one email to kone@ifi.uzh.ch.
 
 ### WP1: Theorem 3.3 (C1)
 1. **Restate precisely.** Write the hypotheses in full, including the implicit ones: row-stochastic P, f_i ≠ 0, every node has an out-edge. Write separate statements for the three cases (λ real/complex, f real/complex).
